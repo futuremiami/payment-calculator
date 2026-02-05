@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Processing Savings Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+            gap: 10px;
+        }
+
+        .step {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #999;
+            transition: all 0.3s ease;
+        }
+
+        .step.active {
+            background: #667eea;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .step.completed {
+            background: #4caf50;
+            color: white;
+        }
+
+        .step-connector {
+            width: 40px;
+            height: 2px;
+            background: #e0e0e0;
+        }
+
+        .form-section {
+            display: none;
+        }
+
+        .form-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="number"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-item:hover {
+            border-color: #667eea;
+            background: #f5f7ff;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        button {
+            flex: 1;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #666;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .results {
+            text-align: center;
+            padding: 30px 0;
+        }
+
+        .savings-amount {
+            font-size: 48px;
+            font-weight: bold;
+            color: #4caf50;
+            margin: 20px 0;
+        }
+
+        .savings-breakdown {
+            background: #f5f7ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .breakdown-item:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 18px;
+            color: #4caf50;
+        }
+
+        .disclaimer {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #856404;
+            margin-top: 20px;
+        }
+
+        .success-message {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 20px;
+            border-radius: 8px;
+            color: #155724;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 15px;
+            border-radius: 8px;
+            color: #721c24;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 Payment Processing Savings Calculator</h1>
+            <p>Discover how much you could save on credit card processing fees</p>
+        </div>
+
+        <div class="step-indicator">
+            <div class="step active" id="step1">1</div>
+            <div class="step-connector"></div>
+            <div class="step" id="step2">2</div>
+            <div class="step-connector"></div>
+            <div class="step" id="step3">3</div>
+            <div class="step-connector"></div>
+            <div class="step" id="step4">4</div>
+        </div>
+
+        <!-- Step 1: Contact Information -->
+        <div class="form-section active" id="section1">
+            <h2 style="margin-bottom: 20px; color: #333;">Let's Get Started</h2>
+            <div class="form-group">
+                <label for="name">Full Name *</label>
+                <input type="text" id="name" required placeholder="John Smith">
+            </div>
+            <div class="form-group">
+                <label for="email">Email Address *</label>
+                <input type="email" id="email" required placeholder="john@company.com">
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone Number *</label>
+                <input type="tel" id="phone" required placeholder="(555) 123-4567">
+            </div>
+            <div class="button-group">
+                <button class="btn-primary" onclick="goToStep(2)">Next</button>
+            </div>
+        </div>
+
+        <!-- Step 2: Monthly Processing -->
+        <div class="form-section" id="section2">
+            <h2 style="margin-bottom: 20px; color: #333;">Monthly Processing Volume</h2>
+            <div class="form-group">
+                <label for="monthlyProcessed">Total Dollars Processed Monthly *</label>
+                <input type="number" id="monthlyProcessed" required placeholder="50000" step="0.01">
+                <small style="color: #666; margin-top: 5px; display: block;">Enter the total amount in dollars</small>
+            </div>
+            <div class="button-group">
+                <button class="btn-secondary" onclick="goToStep(1)">Back</button>
+                <button class="btn-primary" onclick="goToStep(3)">Next</button>
+            </div>
+        </div>
+
+        <!-- Step 3: Current Fees -->
+        <div class="form-section" id="section3">
+            <h2 style="margin-bottom: 20px; color: #333;">Current Processing Fees</h2>
+            <div class="form-group">
+                <label for="monthlyFees">Total Credit Card Fees Monthly *</label>
+                <input type="number" id="monthlyFees" required placeholder="1500" step="0.01">
+                <small style="color: #666; margin-top: 5px; display: block;">Enter your total monthly fees in dollars</small>
+            </div>
+            <div class="button-group">
+                <button class="btn-secondary" onclick="goToStep(2)">Back</button>
+                <button class="btn-primary" onclick="goToStep(4)">Next</button>
+            </div>
+        </div>
+
+        <!-- Step 4: Card Types -->
+        <div class="form-section" id="section4">
+            <h2 style="margin-bottom: 20px; color: #333;">Card Types Accepted</h2>
+            <div class="form-group">
+                <label>Do you accept any of the following? (Check all that apply)</label>
+                <div class="checkbox-group">
+                    <label class="checkbox-item">
+                        <input type="checkbox" id="discover" value="discover">
+                        <span>Discover</span>
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" id="amex" value="amex">
+                        <span>American Express</span>
+                    </label>
+                </div>
+            </div>
+            <div class="button-group">
+                <button class="btn-secondary" onclick="goToStep(3)">Back</button>
+                <button class="btn-primary" onclick="calculateSavings()">Calculate Savings</button>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="form-section" id="resultsSection">
+            <div class="results">
+                <h2 style="color: #333; margin-bottom: 10px;">Your Potential Savings</h2>
+                <div class="savings-amount" id="savingsAmount">$0</div>
+                <p style="color: #666; font-size: 18px;">per month</p>
+                
+                <div class="savings-breakdown">
+                    <div class="breakdown-item">
+                        <span>Current Monthly Fees:</span>
+                        <span id="currentFees">$0</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span>Monthly Processing Volume:</span>
+                        <span id="processingVolume">$0</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span>Our Rate (1.51%):</span>
+                        <span id="ourFees">$0</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span>Your Monthly Savings:</span>
+                        <span id="monthlySavings">$0</span>
+                    </div>
+                </div>
+
+                <div class="disclaimer" id="amexDisclaimer" style="display: none;">
+                    <strong>⚠️ Important Note:</strong> Total fees calculation does not include American Express cards processed, which have higher processing rates.
+                </div>
+
+                <div class="loading" id="loadingSpinner">
+                    <div class="spinner"></div>
+                    <p>Submitting your information...</p>
+                </div>
+
+                <div id="successMessage"></div>
+                <div id="errorMessage"></div>
+
+                <div class="button-group" id="submitButtons">
+                    <button class="btn-primary" onclick="submitLead()">Get Your Custom Quote</button>
+                </div>
+                <button class="btn-secondary" onclick="resetCalculator()" style="margin-top: 10px; width: 100%;">Start Over</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        const formData = {};
+
+        function goToStep(step) {
+            // Validate current step before proceeding
+            if (step > currentStep && !validateStep(currentStep)) {
+                return;
+            }
+
+            // Hide current section
+            document.getElementById(`section${currentStep}`).classList.remove('active');
+            document.getElementById(`step${currentStep}`).classList.remove('active');
+            document.getElementById(`step${currentStep}`).classList.add('completed');
+
+            // Show new section
+            currentStep = step;
+            document.getElementById(`section${step}`).classList.add('active');
+            document.getElementById(`step${step}`).classList.add('active');
+
+            // Update previous steps as completed
+            for (let i = 1; i < step; i++) {
+                document.getElementById(`step${i}`).classList.add('completed');
+            }
+        }
+
+        function validateStep(step) {
+            if (step === 1) {
+                const name = document.getElementById('name').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const phone = document.getElementById('phone').value.trim();
+
+                if (!name || !email || !phone) {
+                    alert('Please fill in all required fields.');
+                    return false;
+                }
+
+                if (!isValidEmail(email)) {
+                    alert('Please enter a valid email address.');
+                    return false;
+                }
+
+                formData.name = name;
+                formData.email = email;
+                formData.phone = phone;
+            } else if (step === 2) {
+                const monthlyProcessed = parseFloat(document.getElementById('monthlyProcessed').value);
+
+                if (!monthlyProcessed || monthlyProcessed <= 0) {
+                    alert('Please enter a valid monthly processing amount.');
+                    return false;
+                }
+
+                formData.monthlyProcessed = monthlyProcessed;
+            } else if (step === 3) {
+                const monthlyFees = parseFloat(document.getElementById('monthlyFees').value);
+
+                if (!monthlyFees || monthlyFees <= 0) {
+                    alert('Please enter a valid monthly fees amount.');
+                    return false;
+                }
+
+                formData.monthlyFees = monthlyFees;
+            }
+
+            return true;
+        }
+
+        function isValidEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        function calculateSavings() {
+            if (!validateStep(3)) {
+                return;
+            }
+
+            // Get card types
+            formData.acceptsDiscover = document.getElementById('discover').checked;
+            formData.acceptsAmex = document.getElementById('amex').checked;
+
+            // Calculate savings
+            const monthlyProcessed = formData.monthlyProcessed;
+            const currentFees = formData.monthlyFees;
+            const ourRate = 0.0151; // 1.51%
+            const ourFees = monthlyProcessed * ourRate;
+            const savings = currentFees - ourFees;
+
+            formData.ourFees = ourFees;
+            formData.savings = savings;
+
+            // Display results
+            document.getElementById('savingsAmount').textContent = 
+                `$${savings.toFixed(2)}`;
+            document.getElementById('currentFees').textContent = 
+                `$${currentFees.toFixed(2)}`;
+            document.getElementById('processingVolume').textContent = 
+                `$${monthlyProcessed.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('ourFees').textContent = 
+                `$${ourFees.toFixed(2)}`;
+            document.getElementById('monthlySavings').textContent = 
+                `$${savings.toFixed(2)}`;
+
+            // Show Amex disclaimer if applicable
+            if (formData.acceptsAmex) {
+                document.getElementById('amexDisclaimer').style.display = 'block';
+            }
+
+            // Show results section
+            document.getElementById('section4').classList.remove('active');
+            document.getElementById('step4').classList.add('completed');
+            document.getElementById('resultsSection').classList.add('active');
+        }
+
+        async function submitLead() {
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const submitButtons = document.getElementById('submitButtons');
+            const successMessage = document.getElementById('successMessage');
+            const errorMessage = document.getElementById('errorMessage');
+
+            // Clear previous messages
+            successMessage.innerHTML = '';
+            errorMessage.innerHTML = '';
+
+            // Show loading
+            loadingSpinner.classList.add('active');
+            submitButtons.style.display = 'none';
+
+            // Prepare email content
+            const emailContent = `
+New Payment Processing Lead
+
+Contact Information:
+- Name: ${formData.name}
+- Email: ${formData.email}
+- Phone: ${formData.phone}
+
+Processing Details:
+- Monthly Volume: $${formData.monthlyProcessed.toLocaleString('en-US', {minimumFractionDigits: 2})}
+- Current Monthly Fees: $${formData.monthlyFees.toFixed(2)}
+- Accepts Discover: ${formData.acceptsDiscover ? 'Yes' : 'No'}
+- Accepts American Express: ${formData.acceptsAmex ? 'Yes' : 'No'}
+
+Calculated Savings:
+- Our Rate (1.51%): $${formData.ourFees.toFixed(2)}
+- Monthly Savings: $${formData.savings.toFixed(2)}
+- Annual Savings: $${(formData.savings * 12).toFixed(2)}
+
+${formData.acceptsAmex ? 'Note: Customer accepts American Express (higher processing rates apply)' : ''}
+            `.trim();
+
+            try {
+                // Using Formspree as a simple email forwarding service
+                const response = await fetch('https://formspree.io/f/xvgovoob', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'futurebuffalo@gmail.com',
+                        subject: `New Lead: ${formData.name} - $${formData.savings.toFixed(2)}/mo Savings`,
+                        message: emailContent,
+                        _replyto: formData.email
+                    })
+                });
+
+                loadingSpinner.classList.remove('active');
+
+                if (response.ok) {
+                    successMessage.innerHTML = `
+                        <div class="success-message">
+                            <h3 style="margin-bottom: 10px;">✓ Thank You!</h3>
+                            <p>Your information has been submitted successfully. Our team will contact you shortly to discuss your potential savings of <strong>$${formData.savings.toFixed(2)}/month</strong>!</p>
+                        </div>
+                    `;
+                } else {
+                    throw new Error('Submission failed');
+                }
+            } catch (error) {
+                loadingSpinner.classList.remove('active');
+                errorMessage.innerHTML = `
+                    <div class="error-message">
+                        <strong>Unable to submit at this time.</strong><br>
+                        Please contact us directly at futurebuffalo@gmail.com or try again later.
+                    </div>
+                `;
+                submitButtons.style.display = 'flex';
+            }
+        }
+
+        function resetCalculator() {
+            location.reload();
+        }
+    </script>
+</body>
+</html>
